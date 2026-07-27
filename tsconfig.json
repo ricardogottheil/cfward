@@ -14,5 +14,5 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "tsup.config.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "tsdown.config.ts"]
 }
