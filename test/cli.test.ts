@@ -1,7 +1,8 @@
-import { mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
+import { pathToFileURL } from "node:url";
 import { ExitCode } from "@stricli/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CloudflareError } from "../src/cloudflare/index.js";
@@ -13,6 +14,7 @@ import login, {
   type BackendHolder,
 } from "../src/commands/login.js";
 import use from "../src/commands/use.js";
+import { readPackageVersion } from "../src/commands/version.js";
 import { parseConfig, ProjectError } from "../src/project/index.js";
 import {
   SecretError,
@@ -279,5 +281,39 @@ describe("the stdin/vault conflict guard", () => {
     expect(result.status).toBe("rejected");
     expect(String((result as PromiseRejectedResult).reason)).toMatch(/whitespace/);
     expect(consumed).toBe(true);
+  });
+});
+
+describe("readPackageVersion", () => {
+  it("reports the version this package was published with", async () => {
+    // This file sits one directory below the package root, the same depth as
+    // `src/cli.ts` and as the bundled `dist/cli.js`, so it exercises the exact
+    // relative path the CLI uses. The expected value is read through the
+    // working directory instead, so a resolver that finds the wrong manifest
+    // cannot agree with itself.
+    const manifest = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf8"));
+
+    expect(readPackageVersion(import.meta.url)).toBe(manifest.version);
+  });
+
+  it("explains an installation with no manifest instead of throwing a read error", () => {
+    // Resolves to `<root>/package.json`, which is not there.
+    const entry = pathToFileURL(join(root, "dist", "cli.js")).href;
+
+    expect(() => readPackageVersion(entry)).toThrow(CliError);
+    try {
+      readPackageVersion(entry);
+    } catch (exc) {
+      expect((exc as CliError).hint).toMatch(/Reinstall/);
+    }
+  });
+
+  it("rejects a manifest whose version is missing or not a string", async () => {
+    const entry = pathToFileURL(join(root, "dist", "cli.js")).href;
+
+    for (const contents of ['{"name":"cfward"}', '{"version":42}', '{"version":""}']) {
+      await writeFile(join(root, "package.json"), contents);
+      expect(() => readPackageVersion(entry)).toThrow(/declares no version/);
+    }
   });
 });

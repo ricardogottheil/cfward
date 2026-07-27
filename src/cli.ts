@@ -3,6 +3,7 @@ import { buildContext } from "./commands/context.js";
 import { describeFailure } from "./commands/errors.js";
 import { HANDLED_ERROR, normalizeExitCode } from "./commands/exit.js";
 import { routes } from "./commands/index.js";
+import { readPackageVersion } from "./commands/version.js";
 
 /**
  * Stricli formats its own stderr output through this table, so overriding the
@@ -21,6 +22,19 @@ const text: ApplicationText = {
 
 const app = buildApplication(routes, {
   name: "cfward",
+  // Registers `--version` (and `-v`) on the root command. `getCurrentVersion`
+  // rather than a static `currentVersion` so the manifest is read only when
+  // the flag is actually present, and no other command pays for it. No
+  // `getLatestVersion`: that would make every run phone an update server, and
+  // this CLI talks to api.cloudflare.com and to nothing else.
+  //
+  // Stricli marks this field deprecated in favour of its `version` integration,
+  // but passing integrations explicitly replaces the defaults, which would mean
+  // re-declaring `help`, `helpAll` and a full formatting configuration here
+  // only to reproduce what the library already builds.
+  versionInfo: {
+    getCurrentVersion: async () => readPackageVersion(import.meta.url),
+  },
   scanner: {
     // `--account-id` reads better than `--accountId`, and `cfward run --
     // wrangler deploy --env prod` needs everything past the dashes handed to
