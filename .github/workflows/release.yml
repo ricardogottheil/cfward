@@ -1,55 +1,56 @@
-name: CI
+name: Release
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  release:
+    types: [published]
 
-# The default token needs nothing more than reading the checkout.
 permissions:
   contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Required for provenance: npm exchanges this OIDC token with Sigstore to
+  # prove the package was built here, from this commit. Without it the publish
+  # fails, because publishConfig.provenance is true in package.json.
+  id-token: write
 
 jobs:
-  check:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # The keychain backend takes a different code path on every platform,
-        # and the vault fallback only triggers where no keychain answers.
-        # Running one OS would leave two of the three untested.
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node: [22, 24]
+  publish:
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
-        # No version pin: pnpm/action-setup reads packageManager from
-        # package.json, so the lockfile and CI can never disagree.
+      - uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node }}
-          cache: pnpm
+          node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
 
+      # Re-run the checks here rather than trusting that CI passed on the
+      # commit. A tag can point at anything, and this is the last gate before
+      # the artefact is public and immutable.
       - run: pnpm typecheck
-
       - run: pnpm test
-
       - run: pnpm build
 
       - name: Verify the shebang survived bundling
-        shell: bash
         run: |
-          # A CLI whose first line is not a shebang installs fine and then
-          # fails to execute. Cheap to check, expensive to discover after
-          # publishing.
           head -1 dist/cli.js | grep -qx '#!/usr/bin/env node' \
             || { echo "::error::dist/cli.js is missing its shebang"; exit 1; }
+
+      - name: Check the tag matches package.json
+        run: |
+          # A release tagged v0.2.0 that publishes 0.1.0 is confusing forever,
+          # because npm versions cannot be replaced.
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          [ "$tag" = "$pkg" ] \
+            || { echo "::error::tag $tag does not match package.json $pkg"; exit 1; }
+
+      - run: npm publish
+        # No NODE_AUTH_TOKEN. With trusted publishing configured on npmjs.com
+        # for this repository and workflow, authentication happens over OIDC
+        # and there is no long-lived token to leak from the repository secrets.
+        # That posture is hard to argue against in a tool whose whole pitch is
+        # not leaving credentials lying around.
