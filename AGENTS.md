@@ -110,9 +110,11 @@ ask rather than improvising.
 ## Boundaries
 
 - Do not modify `src/secrets/` without being asked. It is reviewed code that
-  handles credentials. `.claude/settings.json` denies `Edit` and `Write` there,
-  but that deny prevents accidents, not determination: Bash can still write to
-  those paths through `cp`, `tee`, `sd`, or shell redirection. Treat it as a
+  handles credentials. `.claude/settings.json` denies `Edit(src/secrets/**)`,
+  which already covers every built-in file-editing tool including `Write` — a
+  separate `Write(...)` entry is inert and Claude Code warns about it, so do not
+  add one back. But that deny prevents accidents, not determination: Bash can
+  still write to those paths through `cp`, `tee`, `sd`, or shell redirection. Treat it as a
   signpost, not a sandbox. Reaching for Bash to modify a file the deny list
   covers is the signal to stop and ask, not a workaround to use.
 - Do not commit or push. Leave changes staged for human review.
