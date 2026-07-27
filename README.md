@@ -6,7 +6,15 @@
      The cover lives inside the <h1> on purpose. The document keeps a real
      top-level heading, named by the image's alt text, without printing the
      title twice. Do not try to hide a separate <h1> instead: GitHub's
-     sanitizer strips both `style` and `hidden`, so it would render visible. -->
+     sanitizer strips both `style` and `hidden`, so it would render visible.
+
+     The version badge reads registry.npmjs.org through shieldcn's dynamic
+     JSON badge rather than its /npm/ provider, which looks like the obvious
+     URL and is the reason this one is long. The provider caches its registry
+     lookup server-side for long enough to miss whole releases: it was still
+     rendering 0.1.0 on a cache-busted request after 0.1.2 and 0.1.3 had both
+     shipped. Reading the registry directly cuts the lag to the one hour the
+     image itself is cached for. -->
 
 <h1 align="center">
   <picture>
@@ -16,7 +24,7 @@
 </h1>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/cfward"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/cfward.svg?mode=dark"><img alt="npm version" src="https://shieldcn.dev/npm/cfward.svg?mode=light"></picture></a>
+  <a href="https://www.npmjs.com/package/cfward"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fregistry.npmjs.org%2Fcfward%2Flatest&amp;query=%24.version&amp;label=npm&amp;logo=npm&amp;logoColor=18181b&amp;prefix=v&amp;mode=dark"><img alt="npm version" src="https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fregistry.npmjs.org%2Fcfward%2Flatest&amp;query=%24.version&amp;label=npm&amp;logo=npm&amp;logoColor=fafafa&amp;prefix=v&amp;mode=light"></picture></a>
   <a href="https://github.com/ricardogottheil/cfward/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/ricardogottheil/cfward.svg?workflow=ci.yml&amp;branch=main&amp;mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/ricardogottheil/cfward.svg?workflow=ci.yml&amp;branch=main&amp;mode=light"></picture></a>
   <a href="https://www.npmjs.com/package/cfward"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/node/cfward.svg?mode=dark"><img alt="Node >=22.11.0" src="https://shieldcn.dev/npm/node/cfward.svg?mode=light"></picture></a>
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/ricardogottheil/cfward.svg?mode=dark"><img alt="MIT license" src="https://shieldcn.dev/github/license/ricardogottheil/cfward.svg?mode=light"></picture></a>
