@@ -16,7 +16,7 @@ const PROFILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
  * this to 37 or beyond would let an ordinary long name be rejected with
  * CONFIG_SECRET_IN_FILE, telling the user to rotate a token they never wrote.
  */
-const MAX_PROFILE_LENGTH = 36;
+export const MAX_PROFILE_LENGTH = 36;
 
 /**
  * A Cloudflare API token is 40 characters of [A-Za-z0-9_-]; a legacy global
@@ -24,6 +24,24 @@ const MAX_PROFILE_LENGTH = 36;
  * so the shape is a reliable tell regardless of which key it hides under.
  */
 const TOKEN_SHAPED = /^[A-Za-z0-9_-]{37,}$/;
+
+export type ProfileNameProblem = "too-long" | "invalid-characters";
+
+/**
+ * The single definition of what a profile name may be, shared with the CLI
+ * layer so a name typed at `cfward login` is held to exactly the rules a name
+ * read from `.cfward.json` is. A second copy of the pattern would drift, and
+ * the drift would surface as a profile that can be created but that no
+ * repository is allowed to name.
+ *
+ * Returns the problem rather than a message: the two callers report the same
+ * fact in different vocabularies — one about a file, one about a flag.
+ */
+export function checkProfileName(name: string): ProfileNameProblem | null {
+  if (name.length > MAX_PROFILE_LENGTH) return "too-long";
+  if (!PROFILE_PATTERN.test(name)) return "invalid-characters";
+  return null;
+}
 
 const SECRET_WORDS = [
   "token",
@@ -161,7 +179,9 @@ export function parseConfig(raw: string, configPath: string): CfwardConfig {
     );
   }
 
-  if (profile.length > MAX_PROFILE_LENGTH) {
+  const problem = checkProfileName(profile);
+
+  if (problem === "too-long") {
     throw new ProjectError(
       "CONFIG_INVALID_PROFILE",
       `${configPath}: "profile" is longer than ${MAX_PROFILE_LENGTH} characters.`,
@@ -169,7 +189,7 @@ export function parseConfig(raw: string, configPath: string): CfwardConfig {
     );
   }
 
-  if (!PROFILE_PATTERN.test(profile)) {
+  if (problem === "invalid-characters") {
     throw new ProjectError(
       "CONFIG_INVALID_PROFILE",
       `${configPath}: "profile" must start with a letter or digit and contain only letters, digits, dot, underscore or hyphen.`,

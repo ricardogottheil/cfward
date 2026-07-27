@@ -9,6 +9,11 @@ export default defineConfig({
   format: ["esm"],
   clean: true,
   dts: false,
+  // Overrides the default (`true` for platform node), which would emit
+  // `dist/cli.mjs`. The package is `"type": "module"`, so `.js` is already
+  // unambiguously ESM, and the `bin` entry reads as the executable it is
+  // rather than as a compatibility artifact.
+  fixedExtension: false,
   banner: { js: "#!/usr/bin/env node" },
   deps: {
     // @napi-rs/keyring is a native module: bundling it breaks the platform

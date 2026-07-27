@@ -1,4 +1,9 @@
-export { parseConfig } from "./config.js";
+export {
+  checkProfileName,
+  parseConfig,
+  MAX_PROFILE_LENGTH,
+  type ProfileNameProblem,
+} from "./config.js";
 export { resolveProject, type ResolveOptions } from "./resolve.js";
 export {
   childEnv,
