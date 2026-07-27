@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "deny": ["Edit(src/secrets/**)", "Write(src/secrets/**)"]
+  }
+}

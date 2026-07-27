@@ -13,7 +13,13 @@ this file, not the wrappers.
   `pnpm-lock.yaml`.
 - Strict TypeScript, ESM (`"type": "module"`). Relative imports carry the
   `.js` extension.
-- Tests with vitest. Build with tsup.
+- Tests with vitest. Build with tsdown (Rolldown-based; it replaced tsup, which
+  its own author no longer maintains).
+- **`tsdown.config.ts` pins values that are already tsdown defaults** — `format`,
+  `clean`, `dts`. This is deliberate, not redundancy to clean up: tsdown is
+  pre-1.0 and free to change its defaults between minors, and this build
+  produces the package published to npm. `target` is deliberately _absent_, so
+  the supported Node floor lives only in `engines.node`.
 - Node 22+. **`@types/node` must stay on major 22** to match the supported
   floor. Installing a newer major lets TypeScript accept APIs that do not
   exist on the minimum supported runtime. Raise `engines.node` and the types
@@ -35,7 +41,7 @@ this file, not the wrappers.
 pnpm install
 pnpm typecheck    # tsc --noEmit
 pnpm test         # vitest run
-pnpm build        # tsup
+pnpm build        # tsdown
 ```
 
 Run `pnpm typecheck` and `pnpm test` before reporting a task as done. Do not
@@ -47,7 +53,8 @@ report success on code you have not type-checked.
 src/
   secrets/        Three-layer credential store. ALREADY IMPLEMENTED.
                   keyring (OS) -> vault (encrypted file) -> env (CI)
-  project/        Profile resolution from .cfward.json
+  project/        Config resolution, output redaction, child process
+                  spawning. ALREADY IMPLEMENTED.
   cloudflare/     Cloudflare API client
   commands/       CLI commands
 ```
@@ -74,7 +81,15 @@ ask rather than improvising.
    `export` and never written into the parent shell's environment.
 6. **No new dependencies without justification.** Every transitive dep can read
    the same secrets the CLI reads. Propose the dep and wait for approval.
-7. **Never weaken the crypto to make a test pass or to speed anything up.**
+7. **Child process stdout and stderr are piped, never inherited.** The token
+   has to pass through the redactor before it reaches a terminal, a CI log or a
+   scrollback buffer. The cost is that the child sees a non-TTY stdout and
+   drops colours and progress bars — `wrangler deploy` looks plainer than it
+   does when run directly. That is a known and accepted trade-off, decided
+   deliberately, not a bug to fix. Do not switch `stdio` to `inherit`, do not
+   make redaction conditional on `isTTY`, and do not add a pty dependency
+   (`node-pty` or similar) to win the colours back.
+8. **Never weaken the crypto to make a test pass or to speed anything up.**
    Lowering the scrypt parameters, dropping the AAD binding, or skipping the
    integrity check are never valid fixes. The vault tests take ~500 ms each by
    design: that cost is the security property. If a test fails, the test or
@@ -82,8 +97,10 @@ ask rather than improvising.
 
 ## Conventions
 
-- Domain errors use `SecretError` with a `code` and an actionable `hint`. The
-  user should finish reading knowing which command to run next.
+- Domain errors use `SecretError` or `ProjectError`, each with a `code` to
+  branch on and an actionable `hint`. The user should finish reading knowing
+  which command to run next. Never put a secret, or a value suspected of being
+  one, into either field.
 - The secrets module imports nothing from the CLI layer. The passphrase arrives
   as a callback (`PassphraseProvider`) so it can be tested without a TTY.
 - Comments explain _why_, not _what_.
@@ -93,7 +110,11 @@ ask rather than improvising.
 ## Boundaries
 
 - Do not modify `src/secrets/` without being asked. It is reviewed code that
-  handles credentials.
+  handles credentials. `.claude/settings.json` denies `Edit` and `Write` there,
+  but that deny prevents accidents, not determination: Bash can still write to
+  those paths through `cp`, `tee`, `sd`, or shell redirection. Treat it as a
+  signpost, not a sandbox. Reaching for Bash to modify a file the deny list
+  covers is the signal to stop and ask, not a workaround to use.
 - Do not commit or push. Leave changes staged for human review.
 - Do not add telemetry, analytics, or any network call other than to
   `api.cloudflare.com`.
