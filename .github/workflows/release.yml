@@ -25,6 +25,16 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
+      - name: Upgrade npm for trusted publishing
+        # Node 22 ships npm 10.x, which predates OIDC trusted publishing.
+        # Without this the publish fails as ENEEDAUTH or a 404 on the package,
+        # neither of which points at the real cause: the npm version.
+        #
+        # Pinned to the 11 line rather than @latest, because npm 12 requires
+        # Node ^22.22.2 and a runner image with an older 22 would fail here
+        # for a reason unrelated to publishing.
+        run: npm install -g npm@^11
+
       - run: pnpm install --frozen-lockfile
 
       # Re-run the checks here rather than trusting that CI passed on the
