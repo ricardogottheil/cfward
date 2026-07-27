@@ -1,4 +1,26 @@
-# cfward
+<!-- Cover and badges are served by shieldcn.dev. Every image is wrapped in
+     <picture> because the SVG carries a fixed background: mode=light renders
+     dark-on-light for GitHub's light theme, mode=dark renders light-on-dark.
+     A single URL is invisible against one of the two.
+
+     The cover lives inside the <h1> on purpose. The document keeps a real
+     top-level heading, named by the image's alt text, without printing the
+     title twice. Do not try to hide a separate <h1> instead: GitHub's
+     sanitizer strips both `style` and `hidden`, so it would render visible. -->
+
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/glow.svg?title=cfward&amp;subtitle=Multiple%20Cloudflare%20accounts%2C%20tokens%20encrypted%20at%20rest&amp;logo=lu:KeyRound&amp;theme=orange&amp;mode=dark">
+    <img alt="cfward" src="https://shieldcn.dev/header/glow.svg?title=cfward&amp;subtitle=Multiple%20Cloudflare%20accounts%2C%20tokens%20encrypted%20at%20rest&amp;logo=lu:KeyRound&amp;theme=orange&amp;mode=light">
+  </picture>
+</h1>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/cfward"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/cfward.svg?mode=dark"><img alt="npm version" src="https://shieldcn.dev/npm/cfward.svg?mode=light"></picture></a>
+  <a href="https://github.com/ricardogottheil/cfward/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/ricardogottheil/cfward.svg?workflow=ci.yml&amp;branch=main&amp;mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/ricardogottheil/cfward.svg?workflow=ci.yml&amp;branch=main&amp;mode=light"></picture></a>
+  <a href="https://www.npmjs.com/package/cfward"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/npm/node/cfward.svg?mode=dark"><img alt="Node >=22.11.0" src="https://shieldcn.dev/npm/node/cfward.svg?mode=light"></picture></a>
+  <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/ricardogottheil/cfward.svg?mode=dark"><img alt="MIT license" src="https://shieldcn.dev/github/license/ricardogottheil/cfward.svg?mode=light"></picture></a>
+</p>
 
 Manage multiple Cloudflare accounts across projects, with tokens encrypted at
 rest.
