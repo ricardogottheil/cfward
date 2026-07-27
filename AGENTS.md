@@ -95,6 +95,25 @@ ask rather than improvising.
    design: that cost is the security property. If a test fails, the test or
    the caller is wrong.
 
+## Platform differences
+
+- **Windows has no POSIX signals, and the signal tests are skipped there on
+  purpose.** `process.kill(pid, "SIGTERM")` on Windows is not a signal: libuv
+  maps it to `TerminateProcess`, which stops the target unconditionally with
+  exit code 1. A process cannot install a handler that will ever fire, so the
+  forward-then-escalate behaviour in `src/project/run.ts` and the 128 + n exit
+  convention do not exist on that platform. The affected tests in
+  `test/run.test.ts` are behind `describe.skipIf(process.platform === "win32")`
+  with the reason written out. Do not make them pass on Windows by loosening
+  the assertions — that asserts semantics the platform does not have. The
+  user-visible consequence is documented under Known trade-offs in the README.
+- **Windows stays in the CI matrix anyway.** `src/secrets/paths.ts` has a win32
+  branch and the keychain backend uses Credential Manager. Dropping the OS to
+  make a signal test green would take real coverage with it.
+- **Prefer `process.execPath` over a shell utility in tests.** A test that
+  spawns `sleep` fails on Windows for no reason connected to what it is
+  testing. Node is present wherever the tests run.
+
 ## Conventions
 
 - Domain errors use `SecretError` or `ProjectError`, each with a `code` to

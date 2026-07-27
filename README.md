@@ -186,6 +186,13 @@ and the child therefore sees a non-TTY stdout. This is deliberate. Redaction is
 worth more than colour on a tool whose entire job is keeping a credential out
 of places it should not be.
 
+**On Windows, Ctrl+C during `cfward run` terminates the child immediately.**
+Everywhere else the signal is forwarded to the child, which gets the chance to
+shut down cleanly, and a second Ctrl+C escalates to SIGKILL. Windows has no
+POSIX signals, so there is nothing to forward: the child is stopped outright and
+does not get to run its own cleanup. If the command you are running needs to
+finish what it started, let it finish.
+
 **cfward protects secrets at rest, not against a compromised session.** Anything
 already running as your user can prompt you, read your keychain, or wait for you
 to unlock the vault. What cfward raises the cost of is a stolen laptop, a leaked

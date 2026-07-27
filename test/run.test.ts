@@ -217,6 +217,29 @@ describe("runWithProfile (integration)", () => {
     await expect(failure).rejects.toMatchObject({ code: "SPAWN_FAILED" });
   });
 
+});
+
+/**
+ * Windows has no POSIX signals, so none of this is reproducible there.
+ *
+ * `process.kill(pid, "SIGTERM")` on Windows does not deliver a signal — libuv
+ * maps it to TerminateProcess, which stops the target unconditionally with exit
+ * code 1. The parent never runs its handler, so it can neither forward the
+ * signal to the child, nor escalate to SIGKILL on the second one, nor report
+ * 128 + n: that convention is a shell convention on top of wait(2) status,
+ * which Windows does not have either.
+ *
+ * This is a skip because the platform does not offer the semantics, not because
+ * the tests are flaky. Do not "fix" it by relaxing the assertions until they
+ * pass on Windows — that would assert behaviour cfward does not have there.
+ * The real Windows behaviour is documented under Known trade-offs in the
+ * README: Ctrl+C terminates the child immediately instead of forwarding
+ * something it could handle.
+ *
+ * Windows stays in the CI matrix regardless: paths.ts has a win32 branch and
+ * the keychain backend talks to Credential Manager, and both need coverage.
+ */
+describe.skipIf(process.platform === "win32")("runWithProfile (signals)", () => {
   it(
     "terminates the child when the parent receives SIGTERM",
     async () => {
@@ -382,7 +405,10 @@ describe("runWithProfile (integration)", () => {
           // outlives it. The child's exitCode is set within ~100ms, but
           // `close` will not fire for 30 seconds. Its pid goes to a file
           // because the pipes it is holding are exactly what we cannot read.
-          "const g = require('child_process').spawn('sleep',['30'],{stdio:'inherit'});" +
+          // It is another node rather than `sleep`, which does not exist on
+          // Windows: all this process has to do is stay alive holding the
+          // pipes, and node is by definition present wherever the tests run.
+          "const g = require('child_process').spawn(process.execPath,['-e','setTimeout(()=>{},30000)'],{stdio:'inherit'});" +
             "require('node:fs').writeFileSync(process.env.PID_FILE, String(g.pid));" +
             "process.exit(0)",
         ],
