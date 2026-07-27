@@ -134,6 +134,7 @@ cfward login --profile ci --stdin        # read the token from a pipe
 cfward login --profile x --account-id …  # skip the account picker
 cfward list --tokens                     # show a masked fingerprint of each token
 cfward run --profile staging -- wrangler deploy   # override for one command
+cfward --version                         # or -v, prints the installed version
 ```
 
 `cfward run` passes the child's exit code through unchanged, so it composes
