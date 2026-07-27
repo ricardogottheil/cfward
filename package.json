@@ -1,6 +1,6 @@
 {
   "name": "cfward",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage multiple Cloudflare accounts across projects, with tokens encrypted at rest",
   "license": "MIT",
   "type": "module",
