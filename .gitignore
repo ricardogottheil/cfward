@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Never commit a local vault or profile index. These normally live in the OS
+# config dir, but CFWARD_CONFIG_DIR can point them here during development.
+vault.json
+profiles.json
+.cfward-dev/
+
+.DS_Store
+.env
+.env.*

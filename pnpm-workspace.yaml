@@ -1,0 +1,10 @@
+# pnpm settings live here, not in package.json (pnpm 11+).
+#
+# Dependency install scripts are blocked by default. Every entry below is an
+# explicit decision to let that package run arbitrary code on a developer's
+# machine at install time. For a tool that handles Cloudflare API tokens, that
+# decision belongs in a reviewable diff, not in a local `pnpm approve-builds`.
+allowBuilds:
+  # Transitive dependency of tsup, tsx and vitest. Its install script links the
+  # platform-specific native binary.
+  esbuild: true
