@@ -1,9 +1,26 @@
 {
   "name": "cfward",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Manage multiple Cloudflare accounts across projects, with tokens encrypted at rest",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ricardogottheil/cfward.git"
+  },
+  "homepage": "https://github.com/ricardogottheil/cfward#readme",
+  "bugs": "https://github.com/ricardogottheil/cfward/issues",
+  "author": "Ricardo Gottheil",
+  "keywords": [
+    "cloudflare",
+    "wrangler",
+    "cli",
+    "credentials",
+    "keychain"
+  ],
+  "publishConfig": {
+    "provenance": true
+  },
   "packageManager": "pnpm@11.17.0",
   "engines": {
     "node": ">=22.11.0"

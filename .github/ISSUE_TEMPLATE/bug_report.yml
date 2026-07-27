@@ -1,0 +1,102 @@
+name: Bug report
+description: Something in cfward does not work as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you fill this in:** if the bug exposes a token, or could be
+        used to read someone else's, do not file it here. Report it privately
+        through the [Security tab](https://github.com/ricardogottheil/cfward/security/advisories/new).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+      placeholder: |
+        I ran `cfward use production` in a repository and expected .cfward.json
+        to be written at the repository root. It was written in the
+        subdirectory I was standing in instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands, in order.
+      placeholder: |
+        1. cd ~/work/my-repo/packages/api
+        2. cfward use production
+        3. ls ../../.cfward.json
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Command output
+      description: >
+        Paste the output, including any error message and its hint.
+        Check it for tokens before you paste.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: cfward version
+      description: Output of `cfward --version`.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Storage backend
+      description: >
+        Shown by `cfward status`. The OS keychain and the encrypted vault take
+        very different code paths, so this narrows things down a lot.
+      options:
+        - OS keychain
+        - Encrypted vault
+        - Environment variable (CI)
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15.3 (Apple Silicon) / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      description: Output of `node --version`.
+      placeholder: "v22.14.0"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: no-secrets
+    attributes:
+      label: Confirmation
+      options:
+        - label: >
+            I have checked everything pasted above and it contains no API
+            tokens, account IDs I would rather not publish, or other
+            credentials.
+          required: true
+        - label: >
+            I am running the latest published version, or I have said above
+            why I cannot upgrade.
+          required: true

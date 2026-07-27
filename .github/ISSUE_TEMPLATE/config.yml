@@ -1,0 +1,18 @@
+# Removes the "Open a blank issue" escape hatch. Without this, the security
+# link below is easy to walk past — someone with a token-exposure bug files it
+# as a blank public issue and the exploit is public before anyone reads it.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/ricardogottheil/cfward/security/advisories/new
+    about: >
+      Anything that could expose a Cloudflare API token, yours or someone
+      else's. Private until an advisory is published. Do not use a public
+      issue for this.
+
+  - name: Question or idea
+    url: https://github.com/ricardogottheil/cfward/discussions
+    about: >
+      For "how do I" and "would you consider" — anything that is not a
+      reproducible bug.
